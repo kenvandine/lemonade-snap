@@ -34,9 +34,9 @@ adopt-info: lemonade
 grade: stable
 confinement: strict
 base: core24
-contact: https://github.com/kenvandine/lemonade-snap/issues
-issues: https://github.com/kenvandine/lemonade-snap/issues
-website: https://github.com/kenvandine/lemonade-snap
+contact: https://github.com/lemonade-sdk/lemonade-snap/issues
+issues: https://github.com/lemonade-sdk/lemonade-snap/issues
+website: https://github.com/lemonade-sdk/lemonade-snap
 license: Apache-2.0
 compression: lzo
 
