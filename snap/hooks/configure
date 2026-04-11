@@ -1,9 +1,0 @@
-#!/bin/bash
-set -e
-
-echo "Getting configuration value for 'server-url'"
-output=$(snapctl get server-url)
-if [ -z $output ]; then
-	echo "No value for server-url, resetting to default"
-    snapctl set server-url=http://127.0.0.1:8000
-fi
