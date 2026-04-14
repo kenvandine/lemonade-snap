@@ -1,4 +1,4 @@
-name: lemonade
+name: lemonade-desktop
 summary: Desktop client for local AI chat powered by lemonade-server
 description: |
   Lemonade is a desktop chat interface for interacting with large language
@@ -30,7 +30,7 @@ description: |
   - Runs entirely on your local machine for privacy
   - Native Wayland and X11 support
 
-adopt-info: lemonade
+adopt-info: lemonade-desktop
 grade: stable
 confinement: strict
 base: core24
@@ -44,7 +44,7 @@ platforms:
   amd64:
 
 parts:
-  lemonade:
+  lemonade-desktop:
     plugin: nil
     source: https://github.com/lemonade-sdk/lemonade.git
     source-type: git
@@ -105,7 +105,7 @@ parts:
       - curl
 
   cleanup:
-    after: [ lemonade ]
+    after: [ lemonade-desktop ]
     plugin: nil
     build-snaps: [ gnome-46-2404 ]
     override-prime: |
@@ -124,7 +124,7 @@ plugs:
     default-provider: lemonade-server
 
 apps:
-  lemonade:
+  lemonade-desktop:
     extensions: [gnome]
     command: bin/launcher
     plugs:
