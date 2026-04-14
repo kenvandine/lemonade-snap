@@ -1,5 +1,6 @@
 name: lemonade-desktop
 summary: Desktop client for local AI chat powered by lemonade-server
+title: Lemonade Desktop
 description: |
   Lemonade is a desktop chat interface for interacting with large language
   models (LLMs) running locally on your machine. It provides a clean,
@@ -37,6 +38,7 @@ base: core24
 contact: https://github.com/lemonade-sdk/lemonade-snap/issues
 issues: https://github.com/lemonade-sdk/lemonade-snap/issues
 website: https://github.com/lemonade-sdk/lemonade-snap
+source-code: https://github.com/lemonade-sdk/lemonade
 license: Apache-2.0
 compression: lzo
 
