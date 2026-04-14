@@ -1,4 +1,4 @@
-name: lemonade
+name: lemonade-desktop
 summary: Desktop client for local AI chat powered by lemonade-server
 description: |
   Lemonade is a desktop chat interface for interacting with large language
@@ -30,7 +30,7 @@ description: |
   - Runs entirely on your local machine for privacy
   - Native Wayland and X11 support
 
-adopt-info: lemonade
+adopt-info: lemonade-desktop
 grade: stable
 confinement: strict
 base: core24
@@ -44,7 +44,7 @@ platforms:
   amd64:
 
 parts:
-  lemonade:
+  lemonade-desktop:
     plugin: nil
     source: https://github.com/lemonade-sdk/lemonade.git
     source-type: git
@@ -105,13 +105,22 @@ parts:
       - curl
 
   cleanup:
-    after: [ lemonade ]
+    after: [ lemonade-desktop ]
     plugin: nil
     build-snaps: [ gnome-46-2404 ]
     override-prime: |
         set -eux
         cd /snap/gnome-46-2404/current
         find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/{} \;
+
+slots:
+  # Pseudo content slot so the transitional lemonade snap can express a
+  # runtime dependency on lemonade-desktop via the content interface.
+  lemonade-desktop:
+    interface: content
+    content: lemonade-desktop
+    read:
+      - $SNAP/meta/snap.yaml
 
 plugs:
   shmem:
@@ -124,7 +133,7 @@ plugs:
     default-provider: lemonade-server
 
 apps:
-  lemonade:
+  lemonade-desktop:
     extensions: [gnome]
     command: bin/launcher
     plugs:
