@@ -118,7 +118,7 @@ slots:
   # runtime dependency on lemonade-desktop via the content interface.
   lemonade-desktop:
     interface: content
-    content: foo
+    content: lemonade-desktop
     read:
       - $SNAP/meta/snap.yaml
 
