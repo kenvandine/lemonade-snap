@@ -1,142 +1,31 @@
 name: lemonade
-summary: Desktop client for local AI chat powered by lemonade-server
+summary: Lemonade desktop AI chat client
 description: |
-  Lemonade is a desktop chat interface for interacting with large language
-  models (LLMs) running locally on your machine. It provides a clean,
-  user-friendly interface for AI conversations with support for GPU and NPU
-  acceleration.
+  This snap has been replaced by lemonade-desktop.
 
-  **Requirements**
+  Installing this snap will automatically install lemonade-desktop,
+  which provides the full desktop chat interface for interacting with
+  large language models (LLMs) running locally on your machine.
 
-  This snap requires the lemonade-server snap to be installed and running.
-  The server provides the AI backend that powers this desktop client.
+  To install the new snap directly:
 
-  To install lemonade-server:
+    sudo snap install lemonade-desktop
 
-    sudo snap install lemonade-server
-
-  The server starts automatically after installation. You can verify it is
-  running with:
-
-    snap services lemonade-server
-
-  The desktop client connects to lemonade-server on localhost port 8000.
-  Ensure the server is running before launching the desktop client.
-
-  **Features**
-
-  - Modern chat interface for AI conversations
-  - Hardware-accelerated inference on GPUs and NPUs
-  - Runs entirely on your local machine for privacy
-  - Native Wayland and X11 support
-
-adopt-info: lemonade
+version: "1.0"
 grade: stable
 confinement: strict
 base: core24
 contact: https://github.com/lemonade-sdk/lemonade-snap/issues
 issues: https://github.com/lemonade-sdk/lemonade-snap/issues
 website: https://github.com/lemonade-sdk/lemonade-snap
-license: Apache-2.0
-compression: lzo
-
-platforms:
-  amd64:
-
-parts:
-  lemonade:
-    plugin: nil
-    source: https://github.com/lemonade-sdk/lemonade.git
-    source-type: git
-    source-subdir: src/app
-    build-snaps:
-      - node/22/stable
-    build-packages:
-      - git
-    override-pull: |
-      craftctl default
-      VERSION=$(craftctl get version)
-      if [ -z $VERSION ]; then
-        VERSION=$(git describe --tags --abbrev=10)
-        craftctl set version=$VERSION
-      fi
-    override-build: |
-      set +u # For unbound variables
-      # workaround for build.snapcraft.io builds
-      # https://bugs.launchpad.net/bugs/1886861
-      if [ -n "$http_proxy" ]; then
-        export ELECTRON_GET_USE_PROXY=1
-        export GLOBAL_AGENT_HTTP_PROXY="${http_proxy}"
-        export GLOBAL_AGENT_HTTPS_PROXY="${http_proxy}"
-      fi
-
-      export PATH="/snap/node/current/bin:$PATH"
-      export npm_config_loglevel="error"
-      export npm_config_progress="false"
-      export npm_config_fund="false"
-      export npm_config_audit="false"
-      export npm_config_update_notifier="false"
-      export NO_UPDATE_NOTIFIER="1"
-
-      cd $CRAFT_PART_BUILD/src/app
-      npm install
-      npm run build
-      cp -rp dist-app $CRAFT_PART_INSTALL/ 
-      cp -rp assets $CRAFT_PART_INSTALL/
-    prime:
-      - -assets/favicon.ico
-      - assets
-      - dist-app
-      - -*/chrome-sandbox
-      - -*/resources/app.asar.unpacked/node_modules/sharp/vendor/lib
-      - -*/resources/app.asar.unpacked/node_modules/sharp/vendor/include
-
-  scripts:
-    plugin: dump
-    source: scripts
-    override-build: |
-      mkdir -p $CRAFT_PART_INSTALL/bin/
-      cp launcher $CRAFT_PART_INSTALL/bin/
-      cp lemonade-server $CRAFT_PART_INSTALL/bin/
-
-  deps:
-    plugin: nil
-    stage-packages:
-      - curl
-
-  cleanup:
-    after: [ lemonade ]
-    plugin: nil
-    build-snaps: [ gnome-46-2404 ]
-    override-prime: |
-        set -eux
-        cd /snap/gnome-46-2404/current
-        find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/{} \;
 
 plugs:
-  shmem:
-    interface: shared-memory
-    private: true
-  lemonade-server:
+  lemonade-desktop:
     interface: content
     content: foo
     target: $SNAP_DATA/foo
-    default-provider: lemonade-server
+    default-provider: lemonade-desktop
 
-apps:
-  lemonade:
-    extensions: [gnome]
-    command: bin/launcher
-    plugs:
-      - audio-playback
-      - audio-record
-      - home
-      - network
-      - shmem
-      - browser-support
-      - hardware-observe
-    environment:
-      GTK_USE_PORTAL: 1
-      TMPDIR: $XDG_RUNTIME_DIR
-      HOME: $SNAP_USER_COMMON
-      AMDGPU_ASIC_ID_TABLE_PATH: $SNAP/gpu-2404/libdrm/amdgpu.ids
+parts:
+  empty:
+    plugin: nil
