@@ -20,10 +20,15 @@ issues: https://github.com/lemonade-sdk/lemonade-snap/issues
 website: https://github.com/lemonade-sdk/lemonade-snap
 
 plugs:
+  lemonade-server:
+    interface: content
+    content: lemonade-server
+    target: $SNAP_DATA/lemonade-server
+    default-provider: lemonade-server
   lemonade-desktop:
     interface: content
-    content: foo
-    target: $SNAP_DATA/foo
+    content: lemonade-desktop
+    target: $SNAP_DATA/lemonade-desktop
     default-provider: lemonade-desktop
 
 parts:
