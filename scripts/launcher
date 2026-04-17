@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Ensure the Tauri app uses the snap-exposed lemonade-server endpoint.
-# Existing settings from pre-Tauri builds can leave the app on its beacon
-# discovery path, which is unreliable under strict confinement.
 DEFAULT_BASE_URL="http://localhost:13305"
 DEBUG_FLAG_FILE="$SNAP_USER_COMMON/.debug-webkit"
 SETTINGS_FILE="$SNAP_USER_COMMON/.config/lemonade/app_settings.json"
