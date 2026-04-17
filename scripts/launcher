@@ -1,31 +1,6 @@
 #!/bin/bash
 
-DEFAULT_BASE_URL="http://localhost:13305"
 DEBUG_FLAG_FILE="$SNAP_USER_COMMON/.debug-webkit"
-SETTINGS_FILE="$SNAP_USER_COMMON/.config/lemonade/app_settings.json"
-LEGACY_SETTINGS_FILE="$SNAP_USER_COMMON/.cache/lemonade/app_settings.json"
-
-if [ ! -f "$SETTINGS_FILE" ] && [ -f "$LEGACY_SETTINGS_FILE" ]; then
-    mkdir -p "$(dirname "$SETTINGS_FILE")"
-    cp "$LEGACY_SETTINGS_FILE" "$SETTINGS_FILE"
-fi
-
-if [ ! -f "$SETTINGS_FILE" ] || \
-   ! grep -Eq '"baseURL"[[:space:]]*:[[:space:]]*\{[[:space:]]*"value"[[:space:]]*:[[:space:]]*"http://localhost:13305"' "$SETTINGS_FILE"; then
-    mkdir -p "$(dirname "$SETTINGS_FILE")"
-    cat > "$SETTINGS_FILE" <<EOF
-{
-  "baseURL": { "value": "$DEFAULT_BASE_URL", "useDefault": false }
-}
-EOF
-fi
-
-# Diagnostic: verify lemonade-server is reachable from the snap network context.
-if curl -s --connect-timeout 2 "$DEFAULT_BASE_URL/api/v1/health" > /dev/null 2>&1; then
-    echo "lemonade-server reachable at $DEFAULT_BASE_URL" >&2
-else
-    echo "WARNING: cannot reach lemonade-server at $DEFAULT_BASE_URL" >&2
-fi
 
 if [ "$LEMONADE_SNAP_DEBUG" = "1" ] || [ -f "$DEBUG_FLAG_FILE" ]; then
     export WEBKIT_DEBUG="${WEBKIT_DEBUG:-all}"
