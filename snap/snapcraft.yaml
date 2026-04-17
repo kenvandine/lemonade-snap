@@ -21,7 +21,7 @@ description: |
 
     snap services lemonade-server
 
-  The desktop client connects to lemonade-server on localhost port 8000.
+  The desktop client connects to lemonade-server on localhost port 13305.
   Ensure the server is running before launching the desktop client.
 
   **Features**
@@ -55,6 +55,7 @@ parts:
       - node/22/stable
     build-packages:
       - git
+      - curl
     override-pull: |
       craftctl default
       VERSION=$(craftctl get version)
@@ -67,12 +68,16 @@ parts:
       # workaround for build.snapcraft.io builds
       # https://bugs.launchpad.net/bugs/1886861
       if [ -n "$http_proxy" ]; then
-        export ELECTRON_GET_USE_PROXY=1
         export GLOBAL_AGENT_HTTP_PROXY="${http_proxy}"
         export GLOBAL_AGENT_HTTPS_PROXY="${http_proxy}"
       fi
 
-      export PATH="/snap/node/current/bin:$PATH"
+      # Install Rust via rustup
+      export RUSTUP_HOME="$CRAFT_PART_BUILD/.rustup"
+      export CARGO_HOME="$CRAFT_PART_BUILD/.cargo"
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+      export PATH="$CARGO_HOME/bin:/snap/node/current/bin:$PATH"
+
       export npm_config_loglevel="error"
       export npm_config_progress="false"
       export npm_config_fund="false"
@@ -82,16 +87,15 @@ parts:
 
       cd $CRAFT_PART_BUILD/src/app
       npm install
-      npm run build
-      cp -rp dist-app $CRAFT_PART_INSTALL/ 
+      npx tauri build --no-bundle
+
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cp src-tauri/target/release/lemonade-app $CRAFT_PART_INSTALL/bin/
       cp -rp assets $CRAFT_PART_INSTALL/
     prime:
       - -assets/favicon.ico
       - assets
-      - dist-app
-      - -*/chrome-sandbox
-      - -*/resources/app.asar.unpacked/node_modules/sharp/vendor/lib
-      - -*/resources/app.asar.unpacked/node_modules/sharp/vendor/include
+      - bin/lemonade-app
 
   scripts:
     plugin: dump
@@ -143,11 +147,15 @@ apps:
       - audio-record
       - home
       - network
+      - network-bind
+      - network-status
       - shmem
       - browser-support
       - hardware-observe
+      - system-observe
     environment:
       GTK_USE_PORTAL: 1
       TMPDIR: $XDG_RUNTIME_DIR
       HOME: $SNAP_USER_COMMON
       AMDGPU_ASIC_ID_TABLE_PATH: $SNAP/gpu-2404/libdrm/amdgpu.ids
+      WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: 1

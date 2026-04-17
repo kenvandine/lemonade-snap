@@ -1,10 +1,46 @@
 #!/bin/bash
 
-if [[ ! -n "$DISABLE_WAYLAND" && -n "$WAYLAND_DISPLAY" ]]; then
-  WAYLAND_OPTS="--enable-features=UseOzonePlatform --ozone-platform-hint=auto --enable-wayland-ime"
+# Ensure the Tauri app uses the snap-exposed lemonade-server endpoint.
+# Existing settings from pre-Tauri builds can leave the app on its beacon
+# discovery path, which is unreliable under strict confinement.
+SETTINGS_FILE="$SNAP_USER_COMMON/.cache/lemonade/app_settings.json"
+DEFAULT_BASE_URL="http://localhost:13305"
+DEBUG_FLAG_FILE="$SNAP_USER_COMMON/.debug-webkit"
+
+if [ ! -f "$SETTINGS_FILE" ] || \
+   ! grep -Eq '"baseURL"[[:space:]]*:[[:space:]]*\{[[:space:]]*"value"[[:space:]]*:[[:space:]]*"http://localhost:13305"' "$SETTINGS_FILE"; then
+    mkdir -p "$(dirname "$SETTINGS_FILE")"
+    cat > "$SETTINGS_FILE" <<EOF
+{
+  "baseURL": { "value": "$DEFAULT_BASE_URL", "useDefault": false }
+}
+EOF
 fi
 
-exec $SNAP/dist-app/linux-unpacked/lemonade \
-	--disable-dev-shm-usage \
-	$WAYLAND_OPTS \
-	--no-sandbox "$@"
+# Diagnostic: verify lemonade-server is reachable from the snap network context.
+if curl -s --connect-timeout 2 "$DEFAULT_BASE_URL/api/v1/health" > /dev/null 2>&1; then
+    echo "lemonade-server reachable at $DEFAULT_BASE_URL" >&2
+else
+    echo "WARNING: cannot reach lemonade-server at $DEFAULT_BASE_URL" >&2
+fi
+
+if [ "$LEMONADE_SNAP_DEBUG" = "1" ] || [ -f "$DEBUG_FLAG_FILE" ]; then
+    export WEBKIT_DEBUG="${WEBKIT_DEBUG:-all}"
+    export G_MESSAGES_DEBUG="${G_MESSAGES_DEBUG:-all}"
+    export DEBUG_INVOCATION="${DEBUG_INVOCATION:-1}"
+    export RUST_BACKTRACE="${RUST_BACKTRACE:-1}"
+    export RUST_LOG="${RUST_LOG:-trace}"
+
+    LOG_DIR="$SNAP_USER_COMMON/logs"
+    LOG_FILE="$LOG_DIR/lemonade-desktop.$(date +%Y%m%d-%H%M%S).log"
+    mkdir -p "$LOG_DIR"
+
+    exec > >(tee -a "$LOG_FILE") 2>&1
+    echo "lemonade-desktop debug logging enabled" >&2
+    echo "  log file: $LOG_FILE" >&2
+    echo "  WEBKIT_DEBUG=$WEBKIT_DEBUG" >&2
+    echo "  G_MESSAGES_DEBUG=$G_MESSAGES_DEBUG" >&2
+    echo "  RUST_LOG=$RUST_LOG" >&2
+fi
+
+exec $SNAP/bin/lemonade-app "$@"
