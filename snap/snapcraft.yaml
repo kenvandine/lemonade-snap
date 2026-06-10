@@ -57,6 +57,7 @@ parts:
     build-packages:
       - git
       - curl
+      - libelf-dev
     override-pull: |
       craftctl default
       VERSION=$(craftctl get version)
@@ -85,6 +86,11 @@ parts:
       export npm_config_audit="false"
       export npm_config_update_notifier="false"
       export NO_UPDATE_NOTIFIER="1"
+
+      # libelf.so.1 is missing from gnome-46-2404-sdk on arm64; supply it via
+      # build-packages and tell the linker to search the system multiarch path.
+      MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+      export RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }-C link-arg=-Wl,-rpath-link,/usr/lib/$MULTIARCH"
 
       cd $CRAFT_PART_BUILD/src/app
       npm install
