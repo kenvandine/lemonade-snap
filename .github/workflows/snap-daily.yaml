@@ -7,8 +7,15 @@ on:
 
 jobs:
   build-edge:
-    runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/main' # Run only for the 'main' branch
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runs-on: ubuntu-24.04
+          - arch: arm64
+            runs-on: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
       with:
