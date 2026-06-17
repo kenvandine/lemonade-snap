@@ -58,6 +58,7 @@ parts:
     build-packages:
       - git
       - curl
+      - libelf-dev
     override-pull: |
       craftctl default
       VERSION=$(craftctl get version)
@@ -79,6 +80,10 @@ parts:
       export CARGO_HOME="$CRAFT_PART_BUILD/.cargo"
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
       export PATH="$CARGO_HOME/bin:/snap/node/current/bin:$PATH"
+
+      # On arm64, the gnome-46-2404-sdk is missing libelf.so.1 (needed by libdw.so.1).
+      # Tell the linker to also search the system library path for transitive deps.
+      export RUSTFLAGS="-Wl,-rpath-link,/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}"
 
       export npm_config_loglevel="error"
       export npm_config_progress="false"
