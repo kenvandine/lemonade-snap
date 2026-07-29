@@ -28,6 +28,12 @@ The desktop client connects to lemonade-server on **localhost port 13305** by de
 sudo snap install lemonade
 ```
 
+If you want to use models that perform live voice transcription, you need to enable the audio recording permission:
+
+```bash
+sudo snap connect lemonade-desktop:audio-record
+```
+
 ## Features
 
 - Modern chat interface for AI conversations
